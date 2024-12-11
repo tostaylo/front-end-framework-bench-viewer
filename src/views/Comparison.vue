@@ -41,32 +41,27 @@
   </div>
 </template>
 
-
 <script lang="ts">
-import { TimingResult, Definition } from "../types/index";
-import { fetchData } from "@/utils/index";
-import Table from "@/components/Table.vue";
-import Checkboxes from "@/components/Checkboxes.vue";
-import SortSelect from "@/components/SortSelect.vue";
-import { defineComponent } from "vue";
+import { TimingResult, Definition } from '../types/index'
+import { fetchData } from '@/utils/index'
+import Table from '@/components/Table.vue'
+import Checkboxes from '@/components/Checkboxes.vue'
+import SortSelect from '@/components/SortSelect.vue'
+import { defineComponent } from 'vue'
 
-type MetricFrameworkType = "timing_type" | "timing_framework";
+type MetricFrameworkType = 'timing_type' | 'timing_framework'
 
-type TimingType =
-  | "total_dur"
-  | "render_during_click"
-  | "render_after_click"
-  | "click_dur";
+type TimingType = 'total_dur' | 'render_during_click' | 'render_after_click' | 'click_dur'
 
-type ThrottleType = "No throttle" | "4x slowdown";
+type ThrottleType = 'No throttle' | '4x slowdown'
 
-type ColumnType = MetricFrameworkType | TimingType;
+type ColumnType = MetricFrameworkType | TimingType
 
 const Component = defineComponent({
   components: {
-    "results-table": Table,
-    "check-boxes": Checkboxes,
-    "sort-select": SortSelect,
+    'results-table': Table,
+    'check-boxes': Checkboxes,
+    'sort-select': SortSelect,
   },
 
   data() {
@@ -79,11 +74,11 @@ const Component = defineComponent({
       tableColumnNames: [] as string[],
       metricFrameworkSortOptions: [] as MetricFrameworkType[],
       timingTypeSortOptions: [] as TimingType[],
-      metricFrameworkSelectType: "" as MetricFrameworkType,
-      timingSelectType: "" as TimingType,
-      throttledSelectType: "No throttle" as ThrottleType,
+      metricFrameworkSelectType: '' as MetricFrameworkType,
+      timingSelectType: '' as TimingType,
+      throttledSelectType: 'No throttle' as ThrottleType,
       pageTitle: this.$router.currentRoute.value.name,
-    };
+    }
   },
   props: {
     timingResults: { type: Array as () => TimingResult[], default: [] },
@@ -96,212 +91,184 @@ const Component = defineComponent({
   },
 
   async mounted() {
-    const names = Object.values(this.timings).map((item) => item.display_name);
-    const metricFrameworkSortOptions = names.slice(
-      0,
-      2
-    ) as MetricFrameworkType[];
-    const timingTypeSortOptions = names.slice(2) as TimingType[];
+    const names = Object.values(this.timings).map((item) => item.display_name)
+    const metricFrameworkSortOptions = names.slice(0, 2) as MetricFrameworkType[]
+    const timingTypeSortOptions = names.slice(2) as TimingType[]
 
-    this.tableColumnNames = names;
-    this.metricFrameworkSortOptions = metricFrameworkSortOptions;
-    this.timingTypeSortOptions = timingTypeSortOptions;
-    this.metricFrameworkSelectType = metricFrameworkSortOptions[0];
-    this.timingSelectType = timingTypeSortOptions[0];
-
+    this.tableColumnNames = names
+    this.metricFrameworkSortOptions = metricFrameworkSortOptions
+    this.timingTypeSortOptions = timingTypeSortOptions
+    this.metricFrameworkSelectType = metricFrameworkSortOptions[0]
+    this.timingSelectType = timingTypeSortOptions[0]
     this.defaultTimingResults4x = (await fetchData<TimingResult[]>(
-      "/trace-results.throttle-4x.json"
-    )) as TimingResult[];
+      'trace-results.throttle-4x.json',
+    )) as TimingResult[]
   },
 
   methods: {
     handleSelect(e: { value: string; sortType: string }) {
-      (this as any)[e.sortType] = e.value;
+      ;(this as any)[e.sortType] = e.value
     },
 
     handleCheckbox(e: { target: { name: string } }, checkboxType: string) {
-      const data =
-        checkboxType === "framework" ? "filteredFrameworks" : "filteredMetrics";
+      const data = checkboxType === 'framework' ? 'filteredFrameworks' : 'filteredMetrics'
 
       // Display names differ from data name.
       // For display we use display_name, for sorting and filtering we use the raw data name.
       // display_name = Total Duration, raw data name = total_dur
       if (this[data].includes(e.target.name)) {
-        this[data] = this[data].filter(
-          (framework) => framework !== e.target.name
-        );
+        this[data] = this[data].filter((framework) => framework !== e.target.name)
       } else {
-        this[data] = [...this[data], e.target.name];
+        this[data] = [...this[data], e.target.name]
       }
     },
     getSortType(
       k_v_Arr: [k: string, v: { display_name: string }][],
-      sortType: ColumnType
+      sortType: ColumnType,
     ): ColumnType {
       return k_v_Arr.filter(
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ([_k, v]) => v.display_name === sortType
-      )[0][0] as ColumnType;
+        ([_k, v]) => v.display_name === sortType,
+      )[0][0] as ColumnType
     },
 
-    getSortMap(
-      filteredTimings: TimingResult[],
-      sortType: ColumnType
-    ): Map<string, TimingResult[]> {
+    getSortMap(filteredTimings: TimingResult[], sortType: ColumnType): Map<string, TimingResult[]> {
       // key will be a framework or a metric
-      let sortMap: Map<string, TimingResult[]> = new Map();
+      const sortMap: Map<string, TimingResult[]> = new Map()
 
       filteredTimings.forEach((item) => {
         // Grouping name Either a Metric or a Framework
-        const groupingName = item[sortType as MetricFrameworkType];
+        const groupingName = item[sortType as MetricFrameworkType]
 
         if (sortMap.get(groupingName)) {
           // Why is typescript making me use ? when we are already in this "if" block?
-          sortMap.get(groupingName)?.push(item);
+          sortMap.get(groupingName)?.push(item)
         } else {
-          sortMap.set(groupingName, [item]);
+          sortMap.set(groupingName, [item])
         }
-      });
+      })
 
-      return sortMap;
+      return sortMap
     },
 
-    getSortedResults(
-      sortMap: Map<string, TimingResult[]>,
-      sortType: ColumnType
-    ): TimingResult[] {
+    getSortedResults(sortMap: Map<string, TimingResult[]>, sortType: ColumnType): TimingResult[] {
       return [...sortMap.values()]
         .map((item) => {
-          item.sort(
-            (a, b) => a[sortType as TimingType] - b[sortType as TimingType]
-          );
-          return item;
+          item.sort((a, b) => a[sortType as TimingType] - b[sortType as TimingType])
+          return item
         })
         .reduce((acc, x) => {
-          return acc.concat(x);
-        }, []);
+          return acc.concat(x)
+        }, [])
     },
 
     getFilteredTimings(timingResults: TimingResult[]): TimingResult[] {
-      const filteredFrameworks = this.filteredFrameworks;
-      const filteredMetrics = this.filteredMetrics;
+      const filteredFrameworks = this.filteredFrameworks
+      const filteredMetrics = this.filteredMetrics
 
       return timingResults
-        .filter(
-          (timing) => !filteredFrameworks.includes(timing.timing_framework)
-        )
-        .filter((timing) => !filteredMetrics.includes(timing.timing_type));
+        .filter((timing) => !filteredFrameworks.includes(timing.timing_framework))
+        .filter((timing) => !filteredMetrics.includes(timing.timing_type))
     },
 
     // Handles all the filtering and sorting from checkboxes and selects
     processResults() {
-      const timingsArr = Object.entries(this.timings);
+      const timingsArr = Object.entries(this.timings)
 
-      const metricFrameworkSortType = this.getSortType(
-        timingsArr,
-        this.metricFrameworkSelectType
-      );
-      const TimingsSortType = this.getSortType(
-        timingsArr,
-        this.timingSelectType
-      );
+      const metricFrameworkSortType = this.getSortType(timingsArr, this.metricFrameworkSelectType)
+      const TimingsSortType = this.getSortType(timingsArr, this.timingSelectType)
 
       const timingResults =
-        this.throttledSelectType === "No throttle"
+        this.throttledSelectType === 'No throttle'
           ? this.timingResults
-          : this.defaultTimingResults4x;
+          : this.defaultTimingResults4x
 
       this.processedTimingResults = this.getSortedResults(
-        this.getSortMap(
-          this.getFilteredTimings(timingResults),
-          metricFrameworkSortType
-        ),
-        TimingsSortType
-      );
+        this.getSortMap(this.getFilteredTimings(timingResults), metricFrameworkSortType),
+        TimingsSortType,
+      )
     },
   },
 
   watch: {
     throttledSelectType() {
-      this.processResults();
+      this.processResults()
     },
     metricFrameworkSelectType() {
-      this.processResults();
+      this.processResults()
     },
     timingSelectType() {
-      this.processResults();
+      this.processResults()
     },
     filteredFrameworks() {
-      this.processResults();
+      this.processResults()
     },
     filteredMetrics() {
-      this.processResults();
+      this.processResults()
     },
     timingResults() {
-      this.processResults();
+      this.processResults()
     },
   },
 
   computed: {
     filterCheckboxes(): {
-      name: string;
-      filteredArr: string[];
-      typeArr: string[];
+      name: string
+      filteredArr: string[]
+      typeArr: string[]
     }[] {
       return [
         {
-          name: "metric",
+          name: 'metric',
           filteredArr: this.filteredMetrics,
           typeArr: Object.keys(this.metrics),
         },
         {
-          name: "framework",
+          name: 'framework',
           filteredArr: this.filteredFrameworks,
           typeArr: Object.keys(this.frameworks),
         },
-      ];
+      ]
     },
     sortSelects(): {
-      name: string;
-      options: ColumnType[];
-      label: string;
-      sortType: ColumnType;
+      name: string
+      options: ColumnType[]
+      label: string
+      sortType: ColumnType
     }[] {
       return [
         {
-          name: "metricFrameworkSelectType",
+          name: 'metricFrameworkSelectType',
           options: this.metricFrameworkSortOptions,
-          label: "Group By",
+          label: 'Group By',
           sortType: this.metricFrameworkSelectType,
         },
         {
-          name: "timingSelectType",
+          name: 'timingSelectType',
           options: this.timingTypeSortOptions,
-          label: "Then Sort By",
+          label: 'Then Sort By',
           sortType: this.timingSelectType,
         },
-      ];
+      ]
     },
 
     throttledSelect(): {
-      name: string;
-      options: ThrottleType[];
-      label: string;
-      sortType: ThrottleType;
+      name: string
+      options: ThrottleType[]
+      label: string
+      sortType: ThrottleType
     } {
       return {
-        name: "throttledSelectType",
-        options: ["No throttle", "4x slowdown"],
-        label: "Throttled CPU",
+        name: 'throttledSelectType',
+        options: ['No throttle', '4x slowdown'],
+        label: 'Throttled CPU',
         sortType: this.throttledSelectType,
-      };
+      }
     },
   },
-});
-export default Component;
+})
+export default Component
 </script>
-
-
 
 <style scoped>
 .form-container {

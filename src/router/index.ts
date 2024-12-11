@@ -38,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/'),
+  history: createWebHistory('/front-end-framework-bench-viewer/'),
   routes,
 })
 

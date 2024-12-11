@@ -2,11 +2,9 @@
   <div>
     <nav id="nav">
       <span :key="link.name" v-for="(link, idx) in links">
-        <router-link :exact="link.exact" :to="link.url">{{
-          link.name
-        }}</router-link
+        <router-link :exact="link.exact" :to="link.url">{{ link.name }}</router-link
         ><!-- eslint-disable-next-line vue/no-parsing-error-->
-        {{ idx < links.length - 1 ? " | " : "" }}
+        {{ idx < links.length - 1 ? ' | ' : '' }}
       </span>
     </nav>
     <router-view
@@ -25,15 +23,15 @@
 </template>
 
 <script lang="ts">
-import { TimingResult, Definition } from "@/types/index";
-import { fetchData } from "@/utils/index";
-import { defineComponent } from "vue";
-import { Pages } from "@/router/pages";
+import { TimingResult, Definition } from '@/types/index'
+import { fetchData } from '@/utils/index'
+import { defineComponent } from 'vue'
+import { Pages } from '@/router/pages'
 
-const { HomePage, Frameworks, Metrics, Comparison, Timings } = Pages;
+const { HomePage, Frameworks, Metrics, Comparison, Timings } = Pages
 
 const Component = defineComponent({
-  name: "App",
+  name: 'App',
   data() {
     return {
       timingResults: [] as TimingResult[],
@@ -47,27 +45,21 @@ const Component = defineComponent({
         { name: Timings.name, url: Timings.path },
         { name: Comparison.name, url: Comparison.path },
       ],
-    };
+    }
   },
 
   async mounted() {
-    const trTask = fetchData<TimingResult[]>(`/trace-results.no-throttle.json`);
-    const mrTask = fetchData<Record<string, Definition>>(
-      "/metric-definitions.json"
-    );
-    const frTask = fetchData<Record<string, Definition>>(
-      "/framework-definitions.json"
-    );
-    const tTask = fetchData<Record<string, Definition>>(
-      "/timing-definitions.json"
-    );
-    this.timingResults = (await trTask) as TimingResult[];
-    this.metrics = (await mrTask) as Record<string, Definition>;
-    this.frameworks = (await frTask) as Record<string, Definition>;
-    this.timings = (await tTask) as Record<string, Definition>;
+    const trTask = fetchData<TimingResult[]>(`trace-results.no-throttle.json`)
+    const mrTask = fetchData<Record<string, Definition>>('metric-definitions.json')
+    const frTask = fetchData<Record<string, Definition>>('framework-definitions.json')
+    const tTask = fetchData<Record<string, Definition>>('timing-definitions.json')
+    this.timingResults = (await trTask) as TimingResult[]
+    this.metrics = (await mrTask) as Record<string, Definition>
+    this.frameworks = (await frTask) as Record<string, Definition>
+    this.timings = (await tTask) as Record<string, Definition>
   },
-});
-export default Component;
+})
+export default Component
 </script>
 
 <style>
