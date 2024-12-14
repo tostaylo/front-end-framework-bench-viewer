@@ -1,9 +1,9 @@
 <template>
   <div>
     <nav id="nav">
+      <a href="https://tostaylo.github.io">Home</a>
       <span :key="link.name" v-for="(link, idx) in links">
-        <router-link :exact="link.exact" :to="link.url">{{ link.name }}</router-link
-        ><!-- eslint-disable-next-line vue/no-parsing-error-->
+        <router-link :exact="link.exact" :to="link.url">{{ link.name }}</router-link>
         {{ idx < links.length - 1 ? ' | ' : '' }}
       </span>
     </nav>
@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts">
-import { TimingResult, Definition } from '@/types/index'
+import { type TimingResult, type Definition } from '@/types/index'
 import { fetchData } from '@/utils/index'
 import { defineComponent } from 'vue'
 import { Pages } from '@/router/pages'
