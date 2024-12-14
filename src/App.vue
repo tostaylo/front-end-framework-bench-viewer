@@ -2,6 +2,7 @@
   <div>
     <nav id="nav">
       <a href="https://tostaylo.github.io">Home</a>
+      <span>|</span>
       <span :key="link.name" v-for="(link, idx) in links">
         <router-link :exact="link.exact" :to="link.url">{{ link.name }}</router-link>
         {{ idx < links.length - 1 ? ' | ' : '' }}
